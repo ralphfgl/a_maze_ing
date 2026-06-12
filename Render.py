@@ -8,34 +8,44 @@ import sys
 
 class Render:
     maze: List[List[int]] = []
-    with open("output_maze.txt", "r") as f:
-        for lines in f.readlines():
-            maze.append([int(l, 16) for l in lines if l != "\n"])
+    wc: str = "█"
+    try:
+        with open("output_maze.txt", "r") as f:
+            # with open("hardcoded_42.txt", "r") as f:
+            for lines in f.readlines():
+                maze.append([int(l, 16) for l in lines if l != "\n"])
+    except FileNotFoundError:
+        print("File do not exist")
+        exit(1)
+    except PermissionError:
+        print("Permission denied")
+        exit(1)
+    row: List = []
     for y in range(len(maze)):
         row = maze[y]
         left: str = ""
         right: str = ""
         up: str = ""
-        down: str = ""
+        middle: str = ""
 
         for x in range(len(row)):
             wall = row[x]
             if wall & 1:
-                up += "/////"
+                up += f"{wc}{wc}{wc}{wc}{wc}"
             else:
-                up += "/   /"
+                up += f"{wc}   {wc}"
             if wall & 8:
-                left = "/"
+                left = f"{wc}"
             else:
                 left = " "
             if wall & 2:
-                right = "/"
+                right = f"{wc}"
             else:
                 right = " "
             if wall == 15:
-                down += "/////"
+                middle += f"{wc}{wc}{wc}{wc}{wc}"
             else:
-                down += f"{left}   {right}"
+                middle += f"{left}   {right}"
         print(f"{up}")
-        print(f"{down}")
-    print("/////" * len(row))
+        print(f"{middle}")
+    print(f"{wc}{wc}{wc}{wc}{wc}" * len(row))
