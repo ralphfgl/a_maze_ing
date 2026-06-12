@@ -44,13 +44,18 @@ def genlitmaz(width: int, height: int) -> list[list]:
             themaze[i][j] = 0
     return themaze
 
+
+def forty_two(width: int, height: int) -> list[list]:
+
+
 def genbigmaz(width: int, height: int) -> list[list]:
-    for i in height:
-        j = 0
-        for j in width:
-            themaze = [i][j] = 0
-            j += 1
-        i += 1
+    themaze = []
+    for i in range(height + 1):
+        for j in range(width + 1):
+            if [i, j] in forty_two(width, height):
+                themaze[i][j] = 1
+            else:
+                themaze[i][j] = 0
     return themaze
 
 def maze(width: int, height: int) -> list[list]:
