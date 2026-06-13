@@ -2,11 +2,6 @@ from __future__ import annotations
 from pydantic import BaseModel, Field, model_validator, ValidationError
 from typing import Optional, Tuple
 import sys
-from typing import List, Dict
-
-
-class ConfigError(Exception):
-    pass
 
 
 class ConfigFile(BaseModel):
