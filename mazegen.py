@@ -1,17 +1,21 @@
 import random
 
 def aleagen() -> str:
+    pass
 
 
 def backtrack(pos: list, themaze: list[list], count: int) -> None:
     if count == 0:
         return
 
+    for a in themaze:
+        print(a)
+    print("\n")
     if themaze[pos[0]][pos[1]] == 0:
-        themaze[pos[0]][pos[1]] = aleagen()
+        themaze[pos[0]][pos[1]] = 1
         count -= 1
-    
-    direction = ['N','W','E','S']
+
+    direction = ['N', 'W', 'E', 'S']
     if themaze[pos[0] - 1][pos[1]] == 1 or pos[0] == 0:
         direction.remove('N')
     if themaze[pos[0]][pos[1] - 1] == 1 or pos[1] == 0:
@@ -39,26 +43,50 @@ def backtrack(pos: list, themaze: list[list], count: int) -> None:
 
 def genlitmaz(width: int, height: int) -> list[list]:
     themaze = []
-    for i in range(height + 1):
-        for j in range(width + 1):
-            themaze[i][j] = 0
+    for j in range(height):
+        linge = []
+        for i in range(width):
+            linge.append(0)
+        themaze.append(linge)
     return themaze
 
 
-def forty_two(width: int, height: int) -> list[list]:
+def forty_two(width: int, height: int, pos: list) -> list[list]:
+    verif = False
+    ok = height / 2
+    ok1 = width / 2
+    if pos[0] <= ok + 2 and pos[0] >= ok - 2:
+        if pos[1] <= ok1 + 3 and pos[1] >= ok1 - 3 and pos[1] != ok1:
+            verif = True
+    if pos[0] <= ok + 2 and pos[0] >= ok + 1:
+        if pos[1] >= ok1 - 3 and pos[1] <= ok1 - 2:
+            verif = False
+    if pos[0] == ok + 1:
+        if pos[1] <= ok1 + 3 and pos[1] >= ok1 + 2:
+            verif = False
+    if pos[0] == ok - 1:
+        if pos[1] == ok1 + 2 or pos[1] == ok1 + 1:
+            verif = False
+    if pos[0] == ok - 1 or pos[0] == ok - 2:
+        if pos[1] == ok1 - 2 or pos[1] == ok1 - 1:
+            verif = False
+    return verif
 
 
 def genbigmaz(width: int, height: int) -> list[list]:
     themaze = []
-    for i in range(height + 1):
-        for j in range(width + 1):
-            if [i, j] in forty_two(width, height):
-                themaze[i][j] = 1
+    for j in range(height):
+        linge = []
+        for i in range(width):
+            if forty_two(width, height, [j, i]) is True:
+                linge.append("W")
             else:
-                themaze[i][j] = 0
+                linge.append('`')
+        themaze.append(linge)
     return themaze
 
 def maze(width: int, height: int) -> list[list]:
+    count = 0
     if width <= 7 or height <= 8:
         print("the labrint is too small to display 42")
         themaze = genlitmaz(width, height)
@@ -69,3 +97,7 @@ def maze(width: int, height: int) -> list[list]:
     pos = [random.randint(0, width), random.randint(0, height), height, width]
     tabmaze = backtrack(pos, themaze, count)
     return tabmaze
+
+
+if __name__ == "__main__":
+    maze(10, 10)
