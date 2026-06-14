@@ -2,10 +2,11 @@ import random
 
 
 class Cellule:
-    def __init__(self, visited=False, wall=15, enter=False):
+    def __init__(self, visited=False, wall=15, enter=False, passdir=''):
         self.visited = visited
         self.wall = wall
         self.enter = enter
+        self.passdir = passdir
 
 
 def direc(pos, themaze):
@@ -23,39 +24,65 @@ def direc(pos, themaze):
     return random.choice(direction)
 
 
-def aleagen() -> str:
-    pass
+def dor_gen_exit(pos: list, themaze: list[list]):
+    if themaze[pos[1]][pos[0]].passdir == 'N':
+        themaze[pos[1]][pos[0]].wall &= 1011
+    if themaze[pos[1]][pos[0]].passdir == 'W':
+        themaze[pos[1]][pos[0]].wall &= 1101
+    if themaze[pos[1]][pos[0]].passdir == 'E':
+        themaze[pos[1]][pos[0]].wall &= 111
+    if themaze[pos[1]][pos[0]].passdir == 'S':
+        themaze[pos[1]][pos[0]].wall &= 1110
+    else:
+        themaze[pos[1]][pos[0]].wall &= 1111
 
 
-def backtrack(pos: list, themaze: list[list], count: int) -> None:
-    for b in themaze:
-        for c in b:
-            print(c.visited, end="")
-        print()
-    print()
+def dor_gen_enter(pos: list, themaze: list[list]):
+    if themaze[pos[1]][pos[0]].passdir == 'N':
+        themaze[pos[1]][pos[0]].wall &= 1101
+    if themaze[pos[1]][pos[0]].passdir == 'W':
+        themaze[pos[1]][pos[0]].wall &= 1011
+    if themaze[pos[1]][pos[0]].passdir == 'E':
+        themaze[pos[1]][pos[0]].wall &= 1110
+    if themaze[pos[1]][pos[0]].passdir == 'S':
+        themaze[pos[1]][pos[0]].wall &= 111
+    else:
+        themaze[pos[1]][pos[0]].wall &= 1111
+
+
+def backtrack(pos: list, themaze: list[list]) -> None:
     if themaze[pos[1]][pos[0]].visited is False:
+        dor_gen_exit(pos, themaze)
         themaze[pos[1]][pos[0]].visited = True
 
     direction = direc(pos, themaze)
     while direction:
         if direction == 'N':
             pos[1] -= 1
-            backtrack(pos, themaze, count)
+            themaze[pos[1]][pos[0]].passdir = 'N'
+            dor_gen_enter(pos, themaze)
+            backtrack(pos, themaze)
             pos[1] += 1
             direction = direc(pos, themaze)
         elif direction == 'W':
             pos[0] -= 1
-            backtrack(pos, themaze, count)
+            themaze[pos[1]][pos[0]].passdir = 'W'
+            dor_gen_enter(pos, themaze)
+            backtrack(pos, themaze)
             pos[0] += 1
             direction = direc(pos, themaze)
         elif direction == 'E':
             pos[0] += 1
-            backtrack(pos, themaze, count)
+            themaze[pos[1]][pos[0]].passdir = 'E'
+            dor_gen_enter(pos, themaze)
+            backtrack(pos, themaze)
             pos[0] -= 1
             direction = direc(pos, themaze)
         elif direction == 'S':
             pos[1] += 1
-            backtrack(pos, themaze, count)
+            themaze[pos[1]][pos[0]].passdir = 'S'
+            dor_gen_enter(pos, themaze)
+            backtrack(pos, themaze)
             pos[1] -= 1
             direction = direc(pos, themaze)
     return
@@ -107,22 +134,18 @@ def genbigmaz(width: int, height: int) -> list[list]:
 
 
 def maze(width: int, height: int) -> list[list]:
-    count = 0
     if width <= 8 or height <= 5:
         print("the labrint is too small to display 42")
         themaze = genlitmaz(width, height)
+        pos = [random.randint(0, width - 1), random.randint(0, height - 1), width, height]
     else:
-        count = -18
         themaze = genbigmaz(width, height)
-    count += width * height
     pos = [random.randint(0, width - 1), random.randint(0, height - 1), width, height]
-    backtrack(pos, themaze, count)
+    while forty_two(width, height, [pos[0], pos[1]]) is False:
+        pos = [random.randint(0, width - 1), random.randint(0, height - 1), width, height]
+    backtrack(pos, themaze)
     return themaze
 
 
 if __name__ == "__main__":
-    a = maze(9, 9)
-    for b in a:
-        for c in b:
-            print(c.visited, end="")
-        print()
+    maze(9, 9)
