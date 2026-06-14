@@ -11,7 +11,6 @@ class Render:
     wc: str = "█"
     try:
         with open("output_maze.txt", "r") as f:
-            # with open("hardcoded_42.txt", "r") as f:
             for lines in f.readlines():
                 maze.append([int(l, 16) for l in lines if l != "\n"])
     except FileNotFoundError:
