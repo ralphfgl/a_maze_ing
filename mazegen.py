@@ -16,26 +16,30 @@ def backtrack(pos: list, themaze: list[list], count: int) -> None:
         count -= 1
 
     direction = ['N', 'W', 'E', 'S']
-    if themaze[pos[0] - 1][pos[1]] == 1 or pos[0] == 0:
-        direction.remove('N')
     if themaze[pos[0]][pos[1] - 1] == 1 or pos[1] == 0:
+        direction.remove('N')
+        print('N')
+    if themaze[pos[0] - 1][pos[1]] == 1 or pos[0] == 0:
         direction.remove('W')
-    if themaze[pos[0]][pos[1] + 1] == 1 or pos[1] == pos[3]:
+        print('W')
+    if themaze[pos[0] + 1][pos[1]] == 1 or pos[0] == pos[2] - 1:
         direction.remove('E')
-    if themaze[pos[0] + 1][pos[1]] == 1 or pos[0] == pos[2]:
+        print('E')
+    if themaze[pos[0]][pos[1] + 1] == 1 or pos[1] == pos[3] - 1:
         direction.remove('S')
+        print('S')
     direction = random.choice(direction)
     if direction == 'N':
-        pos[0] -= 1
-        backtrack(pos, themaze, count)
-    elif direction == 'W':
         pos[1] -= 1
         backtrack(pos, themaze, count)
+    elif direction == 'W':
+        pos[0] -= 1
+        backtrack(pos, themaze, count)
     elif direction == 'E':
-        pos[1] += 1
+        pos[0] += 1
         backtrack(pos, themaze, count)
     elif direction == 'S':
-        pos[0] += 1
+        pos[1] += 1
         backtrack(pos, themaze, count)
     else:
         return
@@ -53,8 +57,8 @@ def genlitmaz(width: int, height: int) -> list[list]:
 
 def forty_two(width: int, height: int, pos: list) -> list[list]:
     verif = False
-    ok = height / 2
-    ok1 = width / 2
+    ok = height // 2
+    ok1 = width // 2
     if pos[0] <= ok + 2 and pos[0] >= ok - 2:
         if pos[1] <= ok1 + 3 and pos[1] >= ok1 - 3 and pos[1] != ok1:
             verif = True
@@ -79,11 +83,12 @@ def genbigmaz(width: int, height: int) -> list[list]:
         linge = []
         for i in range(width):
             if forty_two(width, height, [j, i]) is True:
-                linge.append("W")
+                linge.append(1)
             else:
-                linge.append('`')
+                linge.append(0)
         themaze.append(linge)
     return themaze
+
 
 def maze(width: int, height: int) -> list[list]:
     count = 0
@@ -94,10 +99,10 @@ def maze(width: int, height: int) -> list[list]:
         count = -18
         themaze = genbigmaz(width, height)
     count += width * height
-    pos = [random.randint(0, width), random.randint(0, height), height, width]
+    pos = [random.randint(0, width - 1), random.randint(0, height - 1), width, height]
     tabmaze = backtrack(pos, themaze, count)
     return tabmaze
 
 
 if __name__ == "__main__":
-    maze(10, 10)
+    maze(2, 10)
