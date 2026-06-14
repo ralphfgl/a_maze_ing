@@ -46,6 +46,8 @@ def parse_config(filename: str) -> ConfigFile:
             key = key.strip().lower()
             value = value.strip()
             if key in {"entry", "exit"}:
+                if key in "exit":
+                    key += "_"
                 try:
                     x, y = map(int, value.split(","))
                     data[key] = (x, y)
