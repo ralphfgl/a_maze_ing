@@ -7,10 +7,10 @@ import sys
 class ConfigFile(BaseModel):
     """Parsing of maze configuration with validation"""
 
-    width: int = Field(ge=1)
-    height: int = Field(ge=1)
+    width: int = Field(gt=1)
+    height: int = Field(gt=1)
     entry: Tuple[int, int]
-    exit: Tuple[int, int]
+    exit_: Tuple[int, int]
     output_file: str = Field(min_length=1)
     perfect: bool
     seed: Optional[int] = Field(default=None, ge=0)
@@ -18,23 +18,23 @@ class ConfigFile(BaseModel):
     @model_validator(mode="after")
     def validate_config(self) -> "ConfigFile":
         if not (
-            0 <= self.entry[0] <= self.height
-            and 0 <= self.entry[1] <= self.width
+            0 <= self.entry[0] <= self.width
+            and 0 <= self.entry[1] <= self.height
         ):
             raise ValueError("Entry coordinates are out of bound")
         if not (
-            0 <= self.exit[0] <= self.height
-            and 0 <= self.exit[1] <= self.width
+            0 <= self.exit_[0] <= self.width
+            and 0 <= self.exit_[1] <= self.height
         ):
             raise ValueError("Exit coordinates are out of bound")
-        if self.entry == self.exit:
+        if self.entry == self.exit_:
             raise ValueError("Entry and exit have the same coordinates")
         return self
 
 
 def parse_config(filename: str) -> ConfigFile:
     """Parse the config file and create the ConfigFile pydantic Model"""
-    data: dict[str, object] = {}
+    data: dict[str, str | Tuple] = {}
     with open(filename, "r") as f:
         for i, line in enumerate(f):
             line = line.strip()
