@@ -1,48 +1,64 @@
 import random
 
+
+class Cellule:
+    def __init__(self, visited=False, wall=15, enter=False):
+        self.visited = visited
+        self.wall = wall
+        self.enter = enter
+
+
+def direc(pos, themaze):
+    direction = ['N', 'W', 'E', 'S']
+    if pos[1] == 0 or themaze[pos[1] - 1][pos[0]].visited is True:
+        direction.remove('N')
+    if pos[0] == 0 or themaze[pos[1]][pos[0] - 1].visited is True:
+        direction.remove('W')
+    if pos[0] == pos[2] - 1 or themaze[pos[1]][pos[0] + 1].visited is True:
+        direction.remove('E')
+    if pos[1] == pos[3] - 1 or themaze[pos[1] + 1][pos[0]].visited is True:
+        direction.remove('S')
+    if not direction:
+        return False
+    return random.choice(direction)
+
+
 def aleagen() -> str:
     pass
 
 
 def backtrack(pos: list, themaze: list[list], count: int) -> None:
-    if count == 0:
-        return
+    for b in themaze:
+        for c in b:
+            print(c.visited, end="")
+        print()
+    print()
+    if themaze[pos[1]][pos[0]].visited is False:
+        themaze[pos[1]][pos[0]].visited = True
 
-    for a in themaze:
-        print(a)
-    print("\n")
-    if themaze[pos[0]][pos[1]] == 0:
-        themaze[pos[0]][pos[1]] = 1
-        count -= 1
-
-    direction = ['N', 'W', 'E', 'S']
-    if themaze[pos[0]][pos[1] - 1] == 1 or pos[1] == 0:
-        direction.remove('N')
-        print('N')
-    if themaze[pos[0] - 1][pos[1]] == 1 or pos[0] == 0:
-        direction.remove('W')
-        print('W')
-    if themaze[pos[0] + 1][pos[1]] == 1 or pos[0] == pos[2] - 1:
-        direction.remove('E')
-        print('E')
-    if themaze[pos[0]][pos[1] + 1] == 1 or pos[1] == pos[3] - 1:
-        direction.remove('S')
-        print('S')
-    direction = random.choice(direction)
-    if direction == 'N':
-        pos[1] -= 1
-        backtrack(pos, themaze, count)
-    elif direction == 'W':
-        pos[0] -= 1
-        backtrack(pos, themaze, count)
-    elif direction == 'E':
-        pos[0] += 1
-        backtrack(pos, themaze, count)
-    elif direction == 'S':
-        pos[1] += 1
-        backtrack(pos, themaze, count)
-    else:
-        return
+    direction = direc(pos, themaze)
+    while direction:
+        if direction == 'N':
+            pos[1] -= 1
+            backtrack(pos, themaze, count)
+            pos[1] += 1
+            direction = direc(pos, themaze)
+        elif direction == 'W':
+            pos[0] -= 1
+            backtrack(pos, themaze, count)
+            pos[0] += 1
+            direction = direc(pos, themaze)
+        elif direction == 'E':
+            pos[0] += 1
+            backtrack(pos, themaze, count)
+            pos[0] -= 1
+            direction = direc(pos, themaze)
+        elif direction == 'S':
+            pos[1] += 1
+            backtrack(pos, themaze, count)
+            pos[1] -= 1
+            direction = direc(pos, themaze)
+    return
 
 
 def genlitmaz(width: int, height: int) -> list[list]:
@@ -50,7 +66,7 @@ def genlitmaz(width: int, height: int) -> list[list]:
     for j in range(height):
         linge = []
         for i in range(width):
-            linge.append(0)
+            linge.append(Cellule())
         themaze.append(linge)
     return themaze
 
@@ -83,16 +99,16 @@ def genbigmaz(width: int, height: int) -> list[list]:
         linge = []
         for i in range(width):
             if forty_two(width, height, [j, i]) is True:
-                linge.append(1)
+                linge.append(Cellule(visited=True))
             else:
-                linge.append(0)
+                linge.append(Cellule())
         themaze.append(linge)
     return themaze
 
 
 def maze(width: int, height: int) -> list[list]:
     count = 0
-    if width <= 7 or height <= 8:
+    if width <= 8 or height <= 5:
         print("the labrint is too small to display 42")
         themaze = genlitmaz(width, height)
     else:
@@ -100,9 +116,13 @@ def maze(width: int, height: int) -> list[list]:
         themaze = genbigmaz(width, height)
     count += width * height
     pos = [random.randint(0, width - 1), random.randint(0, height - 1), width, height]
-    tabmaze = backtrack(pos, themaze, count)
-    return tabmaze
+    backtrack(pos, themaze, count)
+    return themaze
 
 
 if __name__ == "__main__":
-    maze(2, 10)
+    a = maze(9, 9)
+    for b in a:
+        for c in b:
+            print(c.visited, end="")
+        print()
