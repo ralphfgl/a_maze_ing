@@ -31,7 +31,7 @@ class Render:
         for x in range(len(row)):
             wall = row[x]
             if wall & 1:
-                up += f"{wc}{wc}{wc}{wc}{wc}"
+                up += f"*{wc}{wc}{wc}*"
             else:
                 up += f"{wc}   {wc}"
             if wall & 8:

@@ -173,7 +173,7 @@ def genbigmaz(width: int, height: int) -> list[list]:
 
 def maze(width: int, height: int) -> list[list]:
     if width <= 8 or height <= 5:
-        #print("the labrint is too small to display 42")
+        print("the labrint is too small to display 42")
         themaze = genlitmaz(width, height)
         pos = ([random.randint(0, width - 1), random.randint(0, height - 1),
                 width, height])
