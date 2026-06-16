@@ -60,7 +60,7 @@ def faster(direction: list, pos: list) -> list:
     if height > 0:
         direction[0] = 'S'
         direction[1] = 'N'
-    if long == 0:
+    if height == 0:
         temp = direction[0]
         direction[0] = direction[2]
         direction[2] = temp
@@ -72,6 +72,7 @@ def faster(direction: list, pos: list) -> list:
 
 def backtrack_line(pos: list, themaze: list[list],
                    greenline: list) -> None:
+    print("n")
     if themaze[pos[1]][pos[0]].enter is False:
         themaze[pos[1]][pos[0]].enter = True
         if pos[0] == pos[5] and pos[1] == pos[6]:
@@ -114,9 +115,9 @@ def backtrack_line(pos: list, themaze: list[list],
 
 
 if __name__ == "__main__":
-    lon = 10
-    hau = 10
-    possi = [0, 0, lon, hau, False, 1, 0]
+    lon = 9
+    hau = 9
+    possi = [0, 0, lon, hau, False, 8, 0]
     greenline = []
     s = mazegen.maze(possi[2], possi[3])
     mazegen.render(s)
