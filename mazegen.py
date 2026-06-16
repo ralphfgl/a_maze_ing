@@ -189,5 +189,5 @@ def maze(width: int, height: int) -> list[list]:
 
 
 if __name__ == "__main__":
-    s = maze(25, 25)
+    s = maze(50, 50)
     render(s)

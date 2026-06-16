@@ -1,6 +1,4 @@
 import mazegen
-import random
-
 
 class Cellule:
     def __init__(self, visited=False, wall=15, enter=False, passdir='',
@@ -30,8 +28,7 @@ def open_gate(room, way) -> bool:
     return True
 
 
-def direc(pos, themaze):
-    direction = ['N', 'W', 'E', 'S']
+def direc(pos, themaze, direction):
     if pos[1] == 0 or themaze[pos[1] - 1][pos[0]].enter is True:
         direction.remove('N')
     elif open_gate(themaze[pos[1]][pos[0]].wall, 'N') is False:
@@ -48,36 +45,28 @@ def direc(pos, themaze):
         direction.remove('S')
     elif open_gate(themaze[pos[1]][pos[0]].wall, 'S') is False:
         direction.remove('S')
-    return direction
+    if not direction:
+        return direction
+    return direction[0]
 
 
 def faster(direction: list, pos: list) -> list:
-    if len(direction) > 1:
-        long = pos[0] - pos[5]
-        if long > 0:
-            if 'E' in direction and 'W' in direction:
-                direction.remove('E')
-        elif long < 0:
-            if 'E' in direction and 'W' in direction:
-                direction.remove('W')
-        height = pos[1] - pos[6]
-        if height > 0:
-            if 'N' in direction and 'S' in direction:
-                direction.remove('N')
-        elif height < 0:
-            if 'N' in direction and 'S' in direction:
-                direction.remove('S')
-        elif long == 0 and 'N' in direction or 'S' in direction:
-            if 'E' in direction:
-                direction.remove('E')
-            if 'W' in direction:
-                direction.remove('W')
-        elif height == 0 and 'E' in direction or 'W' in direction:
-            if 'N' in direction:
-                direction.remove('N')
-            if 'S' in direction:
-                direction.remove('S')
-        return random.choice(direction)
+    direction = ['N', 'S', 'E', 'W']
+    long = pos[0] - pos[5]
+    height = pos[1] - pos[6]
+    if long > 0:
+        direction[2] = 'W'
+        direction[3] = 'E'
+    if height > 0:
+        direction[0] = 'S'
+        direction[1] = 'N'
+    if long == 0:
+        temp = direction[0]
+        direction[0] = direction[2]
+        direction[2] = temp
+        temp = direction[1]
+        direction[1] = direction[3]
+        direction[3] = temp
     return direction
 
 
@@ -88,8 +77,8 @@ def backtrack_line(pos: list, themaze: list[list],
         if pos[0] == pos[5] and pos[1] == pos[6]:
             print(greenline)
             pos[4] = True
-    direction = direc(pos, themaze)
-    direction = faster(direction, pos)
+    direction = faster(themaze, pos)
+    direction = direc(pos, themaze, direction)
     while direction:
         if pos[4] is True:
             return
@@ -99,26 +88,26 @@ def backtrack_line(pos: list, themaze: list[list],
             pos[1] -= 1
             backtrack_line(pos, themaze, greenline)
             pos[1] += 1
-            direction = direc(pos, themaze)
             direction = faster(direction, pos)
+            direction = direc(pos, themaze, direction)
         elif direction == 'W':
             pos[0] -= 1
             backtrack_line(pos, themaze, greenline)
             pos[0] += 1
-            direction = direc(pos, themaze)
             direction = faster(direction, pos)
+            direction = direc(pos, themaze, direction)
         elif direction == 'E':
             pos[0] += 1
             backtrack_line(pos, themaze, greenline)
             pos[0] -= 1
-            direction = direc(pos, themaze)
             direction = faster(direction, pos)
+            direction = direc(pos, themaze, direction)
         elif direction == 'S':
             pos[1] += 1
             backtrack_line(pos, themaze, greenline)
             pos[1] -= 1
-            direction = direc(pos, themaze)
             direction = faster(direction, pos)
+            direction = direc(pos, themaze, direction)
         greenline.pop()
         themaze[pos[1]][pos[0]].line = False
     return
@@ -127,7 +116,7 @@ def backtrack_line(pos: list, themaze: list[list],
 if __name__ == "__main__":
     lon = 10
     hau = 10
-    possi = [0, 0, lon, hau, False, 3, 8]
+    possi = [0, 0, lon, hau, False, 1, 0]
     greenline = []
     s = mazegen.maze(possi[2], possi[3])
     mazegen.render(s)
