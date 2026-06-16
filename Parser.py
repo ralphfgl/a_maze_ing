@@ -33,7 +33,13 @@ class ConfigFile(BaseModel):
 
 
 def parse_config(filename: str) -> ConfigFile:
-    """Parse the config file and create the ConfigFile pydantic Model"""
+    """Parse the config file and create the ConfigFile pydantic Model
+
+    Args:
+        filename: name of the config file
+    Returns:
+        ConfigFile object, fully validated"""
+
     data: dict[str, str | Tuple] = {}
     with open(filename, "r") as f:
         for i, line in enumerate(f):

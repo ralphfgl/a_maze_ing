@@ -1,4 +1,4 @@
-from Parser import parse_config
+from Parser import parse_config, ConfigFile
 from abc import ABC, abstractmethod
 from typing import List
 import sys
@@ -6,20 +6,39 @@ import random
 
 
 class Cellule:
-    def __init__(self, visited=False, wall=15, enter=False):
-        self.visited = visited
-        self.wall = wall
-        self.enter = enter
+    """Structure with cell data"""
+
+    def __init__(
+        self,
+        visited: bool = False,
+        wall: int = 15,
+        enter: bool = False,
+        passdir: str = "",
+    ) -> None:
+        self.visited: bool = visited
+        self.wall: int = wall
+        self.enter: bool = enter
+        self.passdir: str = passdir
+
 
 class MazeGeneration(ABC):
+    """Interface for maze generation algorithm"""
+
     @abstractmethod
-    def generate(self, width: int, height: int) -> List[List[Cellule]]:
+    def generate(self, conf: ConfigFile, themaze: List[List[Cellule]]) -> None:
         pass
 
 
-class Depth_first_search(MazeGeneration):
+class DFS(MazeGeneration):
+    """Depth First Search algorithm"""
 
-    def direc(self, pos, themaze):
+    def direc(self, pos: List, themaze: List[List[Cellule]]) -> str | bool:
+        """Pick randomly an unvisited direction
+
+        Args:
+            pos: actual position on the grid
+            themaze: array of Cellule
+        """
         direction = ["N", "W", "E", "S"]
         if pos[1] == 0 or themaze[pos[1] - 1][pos[0]].visited is True:
             direction.remove("N")
@@ -33,89 +52,143 @@ class Depth_first_search(MazeGeneration):
             return False
         return random.choice(direction)
 
-    def aleagen(self) -> str:
-        pass
+    def dor_gen_exit(self, pos: List, themaze: List[List[Cellule]]) -> None:
+        """Open the wall in the cell that is entered
 
-    def backtrack(self, pos: list, themaze: list[list], count: int) -> None:
-        for b in themaze:
-            for c in b:
-                print(c.visited, end="")
-            print()
-        print()
+        Args:
+            pos: actual position on the grid
+            themaze: array of Cellule
+        """
+
+        if themaze[pos[1]][pos[0]].passdir == "N":
+            themaze[pos[1]][pos[0]].wall &= 0b1011
+        elif themaze[pos[1]][pos[0]].passdir == "W":
+            themaze[pos[1]][pos[0]].wall &= 0b1101
+        elif themaze[pos[1]][pos[0]].passdir == "E":
+            themaze[pos[1]][pos[0]].wall &= 0b0111
+        elif themaze[pos[1]][pos[0]].passdir == "S":
+            themaze[pos[1]][pos[0]].wall &= 0b1110
+        else:
+            themaze[pos[1]][pos[0]].wall &= 0b1111
+
+    def dor_gen_enter(self, pos: List, themaze: List[List[Cellule]]) -> None:
+        """Open the wall in the cell that is entered
+
+        Args:
+            pos: actual position on the grid
+            themaze: array of Cellule
+        """
+
+        if themaze[pos[1]][pos[0]].passdir == "N":
+            themaze[pos[1]][pos[0]].wall &= 0b1110
+        elif themaze[pos[1]][pos[0]].passdir == "W":
+            themaze[pos[1]][pos[0]].wall &= 0b0111
+        elif themaze[pos[1]][pos[0]].passdir == "E":
+            themaze[pos[1]][pos[0]].wall &= 0b1101
+        elif themaze[pos[1]][pos[0]].passdir == "S":
+            themaze[pos[1]][pos[0]].wall &= 0b1011
+        else:
+            themaze[pos[1]][pos[0]].wall &= 0b1111
+
+    def backtrack(self, pos: list, themaze: List[List[Cellule]]) -> None:
+        """Recurse throught the grid to generate the maze
+
+        Args:
+            pos: starting position on the grid
+            themaze: array of Cellule, modified in place by the algorithm
+        """
         if themaze[pos[1]][pos[0]].visited is False:
+            self.dor_gen_exit(pos, themaze)
             themaze[pos[1]][pos[0]].visited = True
 
         direction = self.direc(pos, themaze)
         while direction:
             if direction == "N":
+                themaze[pos[1]][pos[0]].passdir = "N"
+                self.dor_gen_enter(pos, themaze)
                 pos[1] -= 1
-                self.backtrack(pos, themaze, count)
+                themaze[pos[1]][pos[0]].passdir = "N"
+                self.backtrack(pos, themaze)
                 pos[1] += 1
                 direction = self.direc(pos, themaze)
             elif direction == "W":
+                themaze[pos[1]][pos[0]].passdir = "W"
+                self.dor_gen_enter(pos, themaze)
                 pos[0] -= 1
-                self.backtrack(pos, themaze, count)
+                themaze[pos[1]][pos[0]].passdir = "W"
+                self.backtrack(pos, themaze)
                 pos[0] += 1
                 direction = self.direc(pos, themaze)
             elif direction == "E":
+                themaze[pos[1]][pos[0]].passdir = "E"
+                self.dor_gen_enter(pos, themaze)
                 pos[0] += 1
-                self.backtrack(pos, themaze, count)
+                themaze[pos[1]][pos[0]].passdir = "E"
+                self.backtrack(pos, themaze)
                 pos[0] -= 1
                 direction = self.direc(pos, themaze)
             elif direction == "S":
+                themaze[pos[1]][pos[0]].passdir = "S"
+                self.dor_gen_enter(pos, themaze)
                 pos[1] += 1
-                self.backtrack(pos, themaze, count)
+                themaze[pos[1]][pos[0]].passdir = "S"
+                self.backtrack(pos, themaze)
                 pos[1] -= 1
                 direction = self.direc(pos, themaze)
         return
 
-    def generate(self) -> List[List[Cellule]]:
-        if width <= 8 or height <= 5:
-        else:
-            themaze = self.genbigmaz(self, width, height, count = 18)
-        count += width * height
+    def generate(self, conf: ConfigFile, themaze: List[List[Cellule]]) -> None:
+        """Start the generation algorithm
+
+        Args:
+            conf: parameters extracted from the config.txt file
+            themaze: array of Cellule
+        """
         pos = [
-            random.randint(0, width - 1),
-            random.randint(0, height - 1),
-            width,
-            height,
+            random.randint(0, conf.width - 1),
+            random.randint(0, conf.height - 1),
+            conf.width,
+            conf.height,
         ]
-        self.backtrack(pos, themaze, count)
-        return themaze
+        self.backtrack(pos, themaze)
 
 
 class MazeSolver(ABC):
+    """Interface for maze generation algorithm"""
+
     @abstractmethod
     def solve():
         pass
 
 
 class MazeContext:
+    """Implementation of a strategy design pattern and initialization"""
+
     def __init__(self, filename: str) -> None:
         self.conf = parse_config(filename)
         if self.conf.width <= 8 or self.conf.height <= 5:
-            print("the labrint is too small to display 42")
-            themaze = self.genlitmaz(self.conf.width, self.conf.height)
+            print("The maze is too small to display 42")
+            self.themaze = self.genlitmaz(self.conf.width, self.conf.height)
         else:
-            themaze = self.genbigmaz(self.conf.width, self.conf.height)
+            self.themaze = self.genbigmaz(self.conf.width, self.conf.height)
         if self.conf.seed == None:
             self.conf.seed = random.randint(0, 9999999)
-        algo = Depth_first_search()
+        self.algo = DFS()
+        self.algo.generate(self.conf, self.themaze)
 
     def genlitmaz(self, width: int, height: int) -> List[List[Cellule]]:
         themaze2 = [[Cellule() for _ in range(width)] for _ in range(height)]
-        """
-        themaze = []
-        for _ in range(height):
-            linge = []
-            for _ in range(width):
-                linge.append(Cellule())
-            themaze.append(linge)
-        return themaze
-        """
         return themaze2
 
     def forty_two(self, width: int, height: int, pos: list) -> bool:
+        """Check if position is in the 42 pattern
+
+        Args:
+            width, height: dimension of the grid
+            pos: position checked
+        Returns:
+            True if the position is on the logo, False otherwise
+        """
         verif = False
         ok = height // 2
         ok1 = width // 2
@@ -137,6 +210,14 @@ class MazeContext:
         return verif
 
     def genbigmaz(self, width: int, height: int) -> list[list]:
+        """Initialize the maze without the 42 pattern
+
+        Args:
+            width, height: x and y value of the grid
+
+        Returns:
+            Initialized maze grid, with a Cellule object instancied for each position
+        """
         themaze = []
         for j in range(height):
             linge = []
@@ -149,8 +230,10 @@ class MazeContext:
         return themaze
 
     def render(self):
-        wc: str = "█"
+        """Render the maze with Ascii characters"""
+
         row: List = []
+        wc = "█"
         for y in range(len(self.themaze)):
             row = self.themaze[y]
             left: str = ""
@@ -159,7 +242,7 @@ class MazeContext:
             middle: str = ""
 
             for x in range(len(row)):
-                wall = row[x]
+                wall = row[x].wall
                 if wall & 1:
                     up += f"{wc}{wc}{wc}{wc}{wc}"
                 else:
@@ -180,7 +263,18 @@ class MazeContext:
             print(f"{middle}")
         print(f"{wc}{wc}{wc}{wc}{wc}" * len(row))
 
+    def cyclic_maze(self):
+        """Open wall to create cycle in the maze"""
+        while i in len(self.themaze):
+            while j in len(i):
+                pass
 
+
+"""
+for each wall between adjacent cells:
+    if wall exists and random() < loopChance:
+        remove wall
+"""
 
 if __name__ == "__main__":
     if len(sys.argv) != 2:
@@ -188,10 +282,4 @@ if __name__ == "__main__":
         exit(1)
 
     maze = MazeContext(sys.argv[1])
-    print(f"{maze.conf}")
-
-    a = maze(9, 9)
-    for b in a:
-        for c in b:
-            print(c.visited, end="")
-        print()
+    maze.render()
