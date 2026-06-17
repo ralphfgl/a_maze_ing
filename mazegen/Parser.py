@@ -14,17 +14,18 @@ class ConfigFile(BaseModel):
     output_file: str = Field(min_length=1)
     perfect: bool
     seed: Optional[int] = Field(default=None, ge=0)
+    cycle_probability: Optional[float] = Field(default=None, ge=0, le=1)
 
     @model_validator(mode="after")
     def validate_config(self) -> "ConfigFile":
         if not (
-            0 <= self.entry[0] <= self.width
-            and 0 <= self.entry[1] <= self.height
+            0 <= self.entry[0] < self.width
+            and 0 <= self.entry[1] < self.height
         ):
             raise ValueError("Entry coordinates are out of bound")
         if not (
-            0 <= self.exit_[0] <= self.width
-            and 0 <= self.exit_[1] <= self.height
+            0 <= self.exit_[0] < self.width
+            and 0 <= self.exit_[1] < self.height
         ):
             raise ValueError("Exit coordinates are out of bound")
         if self.entry == self.exit_:
@@ -40,30 +41,35 @@ def parse_config(filename: str) -> ConfigFile:
     Returns:
         ConfigFile object, fully validated"""
 
-    data: dict[str, str | Tuple] = {}
-    with open(filename, "r") as f:
-        for i, line in enumerate(f):
-            line = line.strip()
-            if not line or line.startswith("#"):
-                continue
-            if "=" not in line:
-                raise ValueError(f"Missing '=' in line {i + 1}")
-            key, value = line.split("=", 1)
-            key = key.strip().lower()
-            value = value.strip()
-            if key in {"entry", "exit"}:
-                if key in "exit":
-                    key += "_"
-                try:
-                    x, y = map(int, value.split(","))
-                    data[key] = (x, y)
-                except ValueError:
-                    raise ValueError(
-                        f"Line {i + 1}: INVALID coordinate: {value}, expected: x,y "
-                    )
-            else:
-                data[key] = value
-    return ConfigFile.model_validate(data)
+    try:
+        data: dict[str, str | Tuple] = {}
+        with open(filename, "r") as f:
+            for i, line in enumerate(f):
+                line = line.strip()
+                if not line or line.startswith("#"):
+                    continue
+                if "=" not in line:
+                    raise ValueError(f"Missing '=' in line {i + 1}")
+                key, value = line.split("=", 1)
+                key = key.strip().lower()
+                value = value.strip()
+                if key in {"entry", "exit"}:
+                    if key in "exit":
+                        key += "_"
+                    try:
+                        x, y = map(int, value.split(","))
+                        data[key] = (x, y)
+                    except ValueError:
+                        raise ValueError(
+                            f"Line {i + 1}: INVALID coordinate: {value}, expected: x,y "
+                        )
+                else:
+                    data[key] = value
+            conf = ConfigFile.model_validate(data)
+    except Exception as e:
+        print(e)
+        exit(1)
+    return conf
 
 
 if __name__ == "__main__":
