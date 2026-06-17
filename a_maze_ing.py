@@ -2,9 +2,7 @@ import random
 import os
 import sys
 
-from mazegen import mazegenerator
-from mazegen import DFS, BFS, A_star
-from mazegen import Parser
+from mazegen import MazeContext, Cellule
 
 
 def print_help():
@@ -27,8 +25,8 @@ def main() -> None:
         print(f"Usage: python3 a_maze_ing.py <config.txt>")
         sys.exit(1)
     maze = MazeContext(sys.argv[1])
-    maze.create_maze()
-    maze.save_to_file(maze.conf.outputfile)
+    maze.render()
+    maze.save_to_file(maze.conf.output_file)
     print(f"Maze saved to {maze.conf.output_file} with seed {maze.conf.seed}")
 
     show_solution = False
@@ -63,7 +61,7 @@ def main() -> None:
         cmd = input("Enter command: ").strip().lower()
         if cmd == "r" or cmd == "recreate":
             new_seed = random.randint(0, 999999)
-            maze.regenerate(new_seed)
+            maze.recreate(new_seed)
             maze.find_solution()
             maze.save_to_file(maze.conf.output_file)
             show_solution = False
@@ -85,7 +83,7 @@ def main() -> None:
 
         elif cmd == "a" or cmd == "algorithm":
             algo_index = (algo_index + 1) % len(algorithms)
-            maze.set_algorithm(algorithms[algo_index])
+            maze.set_algo(algorithms[algo_index])
             maze.find_solution()
             print(f"\nSolving algorithm change to {maze.solver_algorithm}")
             input("\nPress Enter to continue...")
