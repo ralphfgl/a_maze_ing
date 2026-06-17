@@ -35,6 +35,20 @@ class MazeContext:
         self.solution_path = None
         self.solver_algo = "BFS"
 
+        self.wall_color = "\033[37m"  # white
+        self.pattern_color = "\033[32m"  # green
+        self.reset_color = "\033[0m"
+        self.colors = {
+            "1": ("\033[31m", "Red"),
+            "2": ("\033[32m", "Green"),
+            "3": ("\033[33m", "Yellow"),
+            "4": ("\033[34m", "Blue"),
+            "5": ("\033[35m", "Magenta"),
+            "6": ("\033[36m", "Cyan"),
+            "7": ("\033[37m", "White"),
+        }
+        self.find_solution()
+
     def genlitmaz(self, width: int, height: int) -> List[List[Cellule]]:
         themaze2 = [[Cellule() for _ in range(width)] for _ in range(height)]
         return themaze2
@@ -92,8 +106,10 @@ class MazeContext:
         """Render the maze with Ascii characters, optionally showing solution path"""
 
         row: List = []
-        wc = "█"
+        wc = f"{self.wall_color}█{self.reset_color}"
         sc = "•"
+
+        pattern_ch = f"{self.pattern_color}█{self.reset_color}"
         for y in range(len(self.themaze)):
             row = self.themaze[y]
             left: str = ""
@@ -103,17 +119,21 @@ class MazeContext:
 
             for x in range(len(self.themaze[0])):
                 cell = self.themaze[y][x]
-                # is_on_path = cell.line if show_solution else False
-                is_on_path = cell.line if True else False
+                is_on_path = cell.line if show_solution else False
+                is_pattern = cell.static
+                if is_pattern:
+                    wd = pattern_ch
+                else:
+                    wd = wc
                 rc = sc if is_on_path else " "
                 if cell.wall & 1:
-                    up += f"{wc}{wc}{wc}{wc}{wc}"
+                    up += f"{wd}{wd}{wd}{wd}{wd}"
                 else:
-                    up += f"{wc}   {wc}"
-                left = f"{wc}" if (cell.wall & 8) else " "
-                right = f"{wc}" if (cell.wall & 2) else " "
+                    up += f"{wd}   {wd}"
+                left = f"{wd}" if (cell.wall & 8) else " "
+                right = f"{wd}" if (cell.wall & 2) else " "
                 if cell.wall == 15:
-                    middle += f"{wc}{wc}{wc}{wc}{wc}"
+                    middle += f"{wd}{wd}{wd}{wd}{wd}"
                 elif (
                     x == self.conf.exit_[0]
                     and y == self.conf.exit_[1]
@@ -126,16 +146,38 @@ class MazeContext:
                     and show_solution
                 ):
                     middle += f"{left} 1 {right}"
-                else:
+                elif show_solution:
                     middle += f"{left} {rc} {right}"
+                else:
+                    middle += f"{left}   {right}"
             print(f"{up}")
             print(f"{middle}")
-        print(f"{wc}{wc}{wc}{wc}{wc}" * len(row))
+        print(f"{wd}{wd}{wd}{wd}{wd}" * len(row))
+
+    def change_wall_color(self, color_code: str) -> None:
+        """Change wall color with ANSI code"""
+
+        if color_code in self.colors:
+            self.wall_color = self.colors[color_code][0]
+            print(f"Wall color changed to {self.colors[color_code][1]}")
+        else:
+            print(
+                f"Invalid color code. Available: {', '.join(self.colors.keys())}"
+            )
+
+    def change_pattern_color(self, color_code: str) -> None:
+        """Change color of solution path."""
+
+        if color_code in self.colors:
+            self.pattern_color = self.colors[color_code][0]
+            print(f"Pattern color changed to {self.colors[color_code][1]}")
+        else:
+            print(
+                f"Invalid color code. Available: {', '.join(self.colors.keys())}"
+            )
 
     def to_hex_wall(self) -> str:
         """Convert maze to hexadecimal wall representation"""
-        if not self.themaze:
-            return ""
 
         hex_lines = []
         for y in range(len(self.themaze)):
@@ -145,10 +187,25 @@ class MazeContext:
                 line += hex_char
             hex_lines.append(line + "\n")
 
+        hex_lines.append("\n")
+        hex_lines.append(f"{self.conf.entry[0]},{self.conf.entry[1]}\n")
+        hex_lines.append(f"{self.conf.exit_[0]},{self.conf.exit_[1]}\n")
+        if self.solution_path:
+            path_str = "".join(self.solution_path)
+        else:
+            self.find_solution()
+            print(self.solution_path)
+            path_str = (
+                "".join(self.solution_path) if self.solution_path else ""
+            )
+        hex_lines.append(path_str + "\n")
+
         return "".join(hex_lines)
 
     def save_to_file(self, filename: str) -> None:
         """Save maze to file in hexa wall representation"""
+        if not self.solution_path:
+            self.solution_path
         with open(filename, "w") as f:
             f.write(self.to_hex_wall())
 
@@ -176,10 +233,6 @@ class MazeContext:
                     self.themaze[y][x].wall &= 0b1101
                     self.themaze[y][x + 1].wall &= 0b0111
 
-    def change_wall_color(self, color_char: str) -> None:
-        """Change wall color for rendering."""
-        self.wall_color
-
     def recreate(self, new_seed: Optional[int] = None) -> None:
         """Recreate a new maze from a different seed."""
         if new_seed is not None:
@@ -200,18 +253,23 @@ class MazeContext:
     def find_solution(self) -> List[str]:
         """Find solution path using A* or BFS algo"""
 
-        if self.solver_algo == "A*":
+        for y in range(len(self.themaze)):
+            for x in range(len(self.themaze[y])):
+                self.themaze[y][x].line = False
+                self.themaze[y][x].enter = False
+
+        if self.solver_algo == "A_star":
             solver = A_star()
         else:
             solver = BFS()
-        path = solver.solve(self.conf, self.themaze)
-        return path
+        self.solution_path = solver.solve(self.conf, self.themaze)
+        return self.solution_path
 
     def set_algo(self, algo: str) -> None:
         """Change the solving algorithm"""
 
-        if algo in ["BFS", "AStar"]:
-            self.solver_algorithm = algo
+        if algo in ["BFS", "A_star"]:
+            self.solver_algo = algo
             self.solution_path = None
 
 
