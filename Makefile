@@ -9,7 +9,6 @@ run:
 
 install:
 	pip install -e .
-	pip install -r requirements.txt
 
 clean:
 	find . -type f -name "*.pyc" -delete

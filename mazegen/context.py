@@ -204,7 +204,7 @@ class MazeGenerator:
     def save_to_file(self, filename: str) -> None:
         """Save maze to file in hexa wall representation"""
         if not self.solution_path:
-            self.solution_path
+            self.find_solution()
         with open(filename, "w") as f:
             f.write(self.to_hex_wall())
 

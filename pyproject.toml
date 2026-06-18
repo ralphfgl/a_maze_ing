@@ -5,8 +5,17 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "mazegen"
 version = "1.0.0"
-description = "Maze generation library with reproducible results and pathfinding"
+description = "Maze generation library"
 readme = "README.md"
 requires-python = ">=3.10"
-dependencies = ["flake8>=7.3.0", "mypy>=2.1.0","pydantic>=2.0.0"]
+dependencies = ["pydantic>=2.0.0"]
 authors = [{name = "ralph"}, {name= "sacha"}]
+
+[project.optional-dependencies]
+dev = ["flake8>=7.3.0", "mypy>=2.1.0"]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["mazegen*"]
+exclude = ["test_venv*", "tests*", "dist*", "build*"]
+
