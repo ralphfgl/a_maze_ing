@@ -2,7 +2,7 @@ import random
 import os
 import sys
 
-from mazegen import MazeContext, Cellule
+from mazegen import MazeGenerator, Cellule
 
 
 def print_help():
@@ -33,7 +33,7 @@ def main() -> None:
     if len(sys.argv) != 2:
         print(f"Usage: python3 a_maze_ing.py <config.txt>")
         sys.exit(1)
-    maze = MazeContext(sys.argv[1])
+    maze = MazeGenerator(sys.argv[1])
     maze.render()
     maze.save_to_file(maze.conf.output_file)
     print(f"Maze saved to {maze.conf.output_file} with seed {maze.conf.seed}")

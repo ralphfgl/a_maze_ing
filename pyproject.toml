@@ -1,0 +1,12 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mazegen"
+version = "1.0.0"
+description = "Maze generation library with reproducible results and pathfinding"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = ["flake8>=7.3.0", "mypy>=2.1.0","pydantic>=2.0.0"]
+authors = [{name = "ralph"}, {name= "sacha"}]

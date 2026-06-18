@@ -1,14 +1,13 @@
-from .parser import parse_config, ConfigFile
+from .parser import parse_config
 from .generators import DFS
 from .solvers import BFS, A_star
 from .cellule import Cellule
-from abc import ABC, abstractmethod
 from typing import List, Optional
 import sys
 import random
 
 
-class MazeContext:
+class MazeGenerator:
     """Implementation of a strategy design pattern and initialization"""
 
     def __init__(self, filename: str) -> None:
