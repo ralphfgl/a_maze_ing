@@ -8,7 +8,7 @@ run:
 	$(PYTHON) $(MAIN) $(CONFIG)
 
 install:
-	pip install -e .
+	pip install mazegen-1.0.0-py3-none-any.whl
 
 clean:
 	find . -type f -name "*.pyc" -delete
