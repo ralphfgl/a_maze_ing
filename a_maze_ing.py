@@ -2,7 +2,7 @@ import random
 import os
 import sys
 
-from mazegen import MazeGenerator, Cellule
+from mazegen import MazeGenerator
 
 
 def print_help():
@@ -31,7 +31,7 @@ def main() -> None:
     """a_maze_ing main function"""
 
     if len(sys.argv) != 2:
-        print(f"Usage: python3 a_maze_ing.py <config.txt>")
+        print("Usage: python3 a_maze_ing.py <config.txt>")
         sys.exit(1)
     maze = MazeGenerator(sys.argv[1])
     maze.render()
@@ -64,7 +64,8 @@ def main() -> None:
             maze.render(show_solution=False)
 
         print(
-            "\nCommands: [r]ecreate [s]olution [a]lgorithm [w]all_color [p]attern_color [h]elp [q]uit"
+            "\nCommands: [r]ecreate [s]olution [a]lgorithm"
+            "[w]all_color [p]attern_color [h]elp [q]uit"
         )
         cmd = input("Enter command: ").strip().lower()
         if cmd == "r" or cmd == "recreate":

@@ -1,6 +1,6 @@
 import random
 from abc import ABC, abstractmethod
-from typing import List
+from typing import List, Any
 from .parser import ConfigFile
 from .cellule import Cellule
 
@@ -117,7 +117,7 @@ class BFS(MazeSolver):
         """
         pos = [conf.entry[0], conf.entry[1], conf.width, conf.height, False]
         pos_exit = [conf.exit_[0], conf.exit_[1]]
-        greenline = []
+        greenline: List[str] = []
         self.result = []
         self.backtrack_line(pos, themaze, greenline, pos_exit)
         x, y = conf.entry[0], conf.entry[1]
@@ -157,7 +157,7 @@ class A_star:
 
     def direc(
         self, pos: List, themaze: List[List[Cellule]], direction: List
-    ) -> List | bool:
+    ) -> List[str]:
         """Pick randomly an unvisited direction, not obstructed by a wall
 
         Args:
@@ -188,7 +188,10 @@ class A_star:
         return direction[0]
 
     def faster(
-        self, direction: List[str], pos: List, pos_exit: List
+        self,
+        direction: Any,
+        pos: List,
+        pos_exit: List,
     ) -> List[str]:
         direction = ["N", "S", "E", "W"]
         long = pos[0] - pos_exit[0]
@@ -267,7 +270,7 @@ class A_star:
         """
         pos = [conf.entry[0], conf.entry[1], conf.width, conf.height, False]
         pos_exit = [conf.exit_[0], conf.exit_[1]]
-        greenline = []
+        greenline: List[str] = []
         self.result = []
         self.backtrack_line(pos, themaze, greenline, pos_exit)
         x, y = conf.entry[0], conf.entry[1]

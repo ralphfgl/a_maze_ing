@@ -20,18 +20,18 @@ class MazeGenerator:
         else:
             self.themaze = self.genbigmaz(self.conf.width, self.conf.height)
         # init seed
-        if self.conf.seed == None:
+        if self.conf.seed is None:
             self.conf.seed = random.randint(0, 9999999)
         # generate maze
         random.seed(self.conf.seed)
         self.algo = DFS()
         self.algo.generate(self.conf, self.themaze)
-        if self.conf.perfect == False:
+        if not self.conf.perfect:
             if not self.conf.cycle_probability:
                 self.conf.cycle_probability = 0.3
             self.cyclic_maze()
         self.wall_color = "█"
-        self.solution_path = None
+        self.solution_path: Optional[List[str]] = None
         self.solver_algo = "BFS"
 
         self.wall_color = "\033[37m"  # white
@@ -88,7 +88,8 @@ class MazeGenerator:
             width, height: x and y value of the grid
 
         Returns:
-            Initialized maze grid, with a Cellule object instancied for each position
+            Initialized maze grid, with a Cellule object
+            instancied for each position
         """
         themaze = []
         for j in range(height):
@@ -102,7 +103,9 @@ class MazeGenerator:
         return themaze
 
     def render(self, show_solution: bool = False):
-        """Render the maze with Ascii characters, optionally showing solution path"""
+        """Render the maze with Ascii characters,
+        optionally showing solution path
+        """
 
         row: List = []
         wc = f"{self.wall_color}█{self.reset_color}"
@@ -161,7 +164,8 @@ class MazeGenerator:
             print(f"Wall color changed to {self.colors[color_code][1]}")
         else:
             print(
-                f"Invalid color code. Available: {', '.join(self.colors.keys())}"
+                "Invalid color code. Available:"
+                f"{', '.join(self.colors.keys())}"
             )
 
     def change_pattern_color(self, color_code: str) -> None:
@@ -172,7 +176,8 @@ class MazeGenerator:
             print(f"Pattern color changed to {self.colors[color_code][1]}")
         else:
             print(
-                f"Invalid color code. Available: {', '.join(self.colors.keys())}"
+                "Invalid color code. Available:"
+                f"{', '.join(self.colors.keys())}"
             )
 
     def to_hex_wall(self) -> str:
@@ -214,9 +219,10 @@ class MazeGenerator:
             for x in range(len(self.themaze[y])):
                 if (
                     self.themaze[y][x].wall & 0b0100
+                    and self.conf.cycle_probability
                     and random.random() < self.conf.cycle_probability
-                    and self.themaze[y][x].static == False
-                    and self.themaze[y + 1][x].static == False
+                    and not self.themaze[y][x].static
+                    and not self.themaze[y + 1][x].static
                 ):
                     self.themaze[y][x].wall &= 0b1011
                     self.themaze[y + 1][x].wall &= 0b1110
@@ -225,9 +231,10 @@ class MazeGenerator:
             for x in range(len(self.themaze[y]) - 1):
                 if (
                     self.themaze[y][x].wall & 0b0010
+                    and self.conf.cycle_probability
                     and random.random() < self.conf.cycle_probability
-                    and self.themaze[y][x].static == False
-                    and self.themaze[y][x + 1].static == False
+                    and not self.themaze[y][x].static
+                    and not self.themaze[y][x + 1].static
                 ):
                     self.themaze[y][x].wall &= 0b1101
                     self.themaze[y][x + 1].wall &= 0b0111
@@ -258,7 +265,7 @@ class MazeGenerator:
                 self.themaze[y][x].enter = False
 
         if self.solver_algo == "A_star":
-            solver = A_star()
+            solver: A_star | BFS = A_star()
         else:
             solver = BFS()
         self.solution_path = solver.solve(self.conf, self.themaze)
@@ -274,8 +281,8 @@ class MazeGenerator:
 
 if __name__ == "__main__":
     if len(sys.argv) != 2:
-        print(f"Usage: python3 Maze.py config.txt")
+        print("Usage: python3 Maze.py config.txt")
         exit(1)
 
-    maze = MazeContext(sys.argv[1])
+    maze = MazeGenerator(sys.argv[1])
     maze.render()

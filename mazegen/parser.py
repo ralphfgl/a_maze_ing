@@ -61,7 +61,8 @@ def parse_config(filename: str) -> ConfigFile:
                         data[key] = (x, y)
                     except ValueError:
                         raise ValueError(
-                            f"Line {i + 1}: INVALID coordinate: {value}, expected: x,y "
+                            f"Line {i + 1}: INVALID coordinate: "
+                            f"{value}, expected: x,y "
                         )
                 else:
                     data[key] = value
