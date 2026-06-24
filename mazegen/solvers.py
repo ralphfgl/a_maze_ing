@@ -35,7 +35,9 @@ class BFS(MazeSolver):
                 return False
         return True
 
-    def direc(self, pos: List, themaze: List[List[Cellule]]) -> str | bool:
+    def direc(
+        self, pos: List, themaze: List[List[Cellule]], conf: ConfigFile
+    ) -> List:
         """Pick randomly an unvisited direction, not obstructed by a wall
 
         Args:
@@ -55,55 +57,21 @@ class BFS(MazeSolver):
             direction.remove("W")
         elif self.open_gate(themaze[pos[1]][pos[0]].wall, "W") is False:
             direction.remove("W")
-        if pos[0] == pos[2] - 1 or themaze[pos[1]][pos[0] + 1].enter is True:
+        if (
+            pos[0] == conf.width - 1
+            or themaze[pos[1]][pos[0] + 1].enter is True
+        ):
             direction.remove("E")
         elif self.open_gate(themaze[pos[1]][pos[0]].wall, "E") is False:
             direction.remove("E")
-        if pos[1] == pos[3] - 1 or themaze[pos[1] + 1][pos[0]].enter is True:
+        if (
+            pos[1] == conf.height - 1
+            or themaze[pos[1] + 1][pos[0]].enter is True
+        ):
             direction.remove("S")
         elif self.open_gate(themaze[pos[1]][pos[0]].wall, "S") is False:
             direction.remove("S")
-        if not direction:
-            return False
-        return random.choice(direction)
-
-    def backtrack_line(
-        self, pos: List, themaze: List[List], greenline: list, pos_exit: List
-    ) -> None:
-        if themaze[pos[1]][pos[0]].enter is False:
-            themaze[pos[1]][pos[0]].enter = True
-            if pos[0] == pos_exit[0] and pos[1] == pos_exit[1]:
-                self.result = greenline.copy()
-                pos[4] = True
-        direction = self.direc(pos, themaze)
-        while direction:
-            if pos[4] is True:
-                return
-            greenline.append(direction)
-            themaze[pos[1]][pos[0]].line = True
-            if direction == "N":
-                pos[1] -= 1
-                self.backtrack_line(pos, themaze, greenline, pos_exit)
-                pos[1] += 1
-                direction = self.direc(pos, themaze)
-            elif direction == "W":
-                pos[0] -= 1
-                self.backtrack_line(pos, themaze, greenline, pos_exit)
-                pos[0] += 1
-                direction = self.direc(pos, themaze)
-            elif direction == "E":
-                pos[0] += 1
-                self.backtrack_line(pos, themaze, greenline, pos_exit)
-                pos[0] -= 1
-                direction = self.direc(pos, themaze)
-            elif direction == "S":
-                pos[1] += 1
-                self.backtrack_line(pos, themaze, greenline, pos_exit)
-                pos[1] -= 1
-                direction = self.direc(pos, themaze)
-            greenline.pop()
-            themaze[pos[1]][pos[0]].line = False
-        return
+        return direction
 
     def solve(
         self, conf: ConfigFile, themaze: List[List[Cellule]]
@@ -115,23 +83,67 @@ class BFS(MazeSolver):
             themaze: array of Cellule
             greenline: solution path list
         """
-        pos = [conf.entry[0], conf.entry[1], conf.width, conf.height, False]
-        pos_exit = [conf.exit_[0], conf.exit_[1]]
-        greenline: List[str] = []
-        self.result = []
-        self.backtrack_line(pos, themaze, greenline, pos_exit)
-        x, y = conf.entry[0], conf.entry[1]
-        for direction in self.result:
-            if direction == "N":
-                y -= 1
-            elif direction == "S":
-                y += 1
-            elif direction == "W":
-                x -= 1
-            elif direction == "E":
-                x += 1
-            themaze[y][x].line = True
-        return self.result
+
+        idx = 0
+        path: List = []
+        vis = [[conf.entry[0], conf.entry[1], path]]
+        while True:
+            if vis[idx][0] == conf.exit_[0] and vis[idx][1] == conf.exit_[1]:
+                print(vis[idx][2])
+                x, y = conf.entry[0], conf.entry[1]
+                for direction in vis[idx][2]:
+                    if direction == "N":
+                        y -= 1
+                    elif direction == "S":
+                        y += 1
+                    elif direction == "W":
+                        x -= 1
+                    elif direction == "E":
+                        x += 1
+                    themaze[y][x].line = True
+                return vis[idx][2]
+
+            for dir in self.direc(vis[idx], themaze, conf):
+                if dir == "N":
+                    # path += "N"
+                    vis[idx][2].append("N")
+                    vis.append(
+                        [vis[idx][0], vis[idx][1] - 1, vis[idx][2].copy()]
+                    )
+                    themaze[vis[idx][1] - 1][vis[idx][0]].enter = True
+                    vis[idx][2].pop()
+                    # path = path[:-1]
+                if dir == "S":
+                    vis[idx][2].append("S")
+                    # path = vis[idx][2].append("S")
+                    # path += "S"
+                    vis.append(
+                        [vis[idx][0], vis[idx][1] + 1, vis[idx][2].copy()]
+                    )
+                    themaze[vis[idx][1] + 1][vis[idx][0]].enter = True
+                    vis[idx][2].pop()
+                    # path = path[:-1]
+                    # path = vis[idx][2].pop()
+                if dir == "W":
+                    # path += "W"
+                    vis[idx][2].append("W")
+                    vis.append(
+                        [vis[idx][0] - 1, vis[idx][1], vis[idx][2].copy()]
+                    )
+                    themaze[vis[idx][1]][vis[idx][0] - 1].enter = True
+                    vis[idx][2].pop()
+                if dir == "E":
+                    vis[idx][2].append("E")
+                    # path = vis[idx][2].append("E")
+                    # path += "E"
+                    vis.append(
+                        [vis[idx][0] + 1, vis[idx][1], vis[idx][2].copy()]
+                    )
+                    themaze[vis[idx][1]][vis[idx][0] + 1].enter = True
+                    vis[idx][2].pop()
+                    # path = path[:-1]
+                    # path = vis[idx][2].pop()
+            idx += 1
 
 
 class A_star:
