@@ -109,7 +109,7 @@ class MazeGenerator:
 
         row: List = []
         wc = f"{self.wall_color}█{self.reset_color}"
-        sc = "•"
+        sc = "·"
 
         pattern_ch = f"{self.pattern_color}█{self.reset_color}"
         for y in range(len(self.themaze)):
@@ -141,13 +141,13 @@ class MazeGenerator:
                     and y == self.conf.exit_[1]
                     and show_solution
                 ):
-                    middle += f"{left} 2 {right}"
+                    middle += f"{left}{'\033[33m'} ● {self.reset_color}{right}"
                 elif (
                     x == self.conf.entry[0]
                     and y == self.conf.entry[1]
                     and show_solution
                 ):
-                    middle += f"{left} 1 {right}"
+                    middle += f"{left} 𜱭 {right}"
                 elif show_solution:
                     middle += f"{left} {rc} {right}"
                 else:

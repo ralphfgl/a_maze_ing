@@ -89,7 +89,6 @@ class BFS(MazeSolver):
         vis = [[conf.entry[0], conf.entry[1], path]]
         while True:
             if vis[idx][0] == conf.exit_[0] and vis[idx][1] == conf.exit_[1]:
-                print(vis[idx][2])
                 x, y = conf.entry[0], conf.entry[1]
                 for direction in vis[idx][2]:
                     if direction == "N":
@@ -105,27 +104,20 @@ class BFS(MazeSolver):
 
             for dir in self.direc(vis[idx], themaze, conf):
                 if dir == "N":
-                    # path += "N"
                     vis[idx][2].append("N")
                     vis.append(
                         [vis[idx][0], vis[idx][1] - 1, vis[idx][2].copy()]
                     )
                     themaze[vis[idx][1] - 1][vis[idx][0]].enter = True
                     vis[idx][2].pop()
-                    # path = path[:-1]
                 if dir == "S":
                     vis[idx][2].append("S")
-                    # path = vis[idx][2].append("S")
-                    # path += "S"
                     vis.append(
                         [vis[idx][0], vis[idx][1] + 1, vis[idx][2].copy()]
                     )
                     themaze[vis[idx][1] + 1][vis[idx][0]].enter = True
                     vis[idx][2].pop()
-                    # path = path[:-1]
-                    # path = vis[idx][2].pop()
                 if dir == "W":
-                    # path += "W"
                     vis[idx][2].append("W")
                     vis.append(
                         [vis[idx][0] - 1, vis[idx][1], vis[idx][2].copy()]
@@ -134,15 +126,11 @@ class BFS(MazeSolver):
                     vis[idx][2].pop()
                 if dir == "E":
                     vis[idx][2].append("E")
-                    # path = vis[idx][2].append("E")
-                    # path += "E"
                     vis.append(
                         [vis[idx][0] + 1, vis[idx][1], vis[idx][2].copy()]
                     )
                     themaze[vis[idx][1]][vis[idx][0] + 1].enter = True
                     vis[idx][2].pop()
-                    # path = path[:-1]
-                    # path = vis[idx][2].pop()
             idx += 1
 
 

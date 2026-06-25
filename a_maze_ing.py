@@ -33,6 +33,7 @@ def main() -> None:
     if len(sys.argv) != 2:
         print("Usage: python3 a_maze_ing.py <config.txt>")
         sys.exit(1)
+    sys.setrecursionlimit(10000)
     maze = MazeGenerator(sys.argv[1])
     maze.render()
     maze.save_to_file(maze.conf.output_file)
@@ -64,7 +65,7 @@ def main() -> None:
             maze.render(show_solution=False)
 
         print(
-            "\nCommands: [r]ecreate [s]olution [a]lgorithm"
+            "\nCommands: [r]ecreate [s]olution [a]lgorithm "
             "[w]all_color [p]attern_color [h]elp [q]uit"
         )
         cmd = input("Enter command: ").strip().lower()
@@ -118,10 +119,7 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    """
     try:
         main()
     except Exception as e:
         print(e)
-    """
-    main()
